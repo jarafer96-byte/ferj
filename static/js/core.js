@@ -948,7 +948,7 @@ function agregarAlCarritoDOM(nombre, idPrecioSpan, idCantidad, id_base, grupo = 
 }
 
 function vaciarCarrito() {
-    carrito = [];
+    window.carrito = [];
     actualizarCarrito();
     ocultarFormulario(); 
 }
@@ -958,7 +958,7 @@ function eliminarDelCarrito(id_base, talle, event) {
 
   console.log("[CARRITO] ❌ Eliminando:", { id_base, talle });
 
-  carrito = carrito.filter(p => {
+  window.carrito = window.carrito.filter(p => {
     if (talle && talle !== "unico") {
       return !(p.id_base === id_base && p.talle === talle);
     } else {
@@ -1546,4 +1546,5 @@ document.getElementById('loginToggleBtn').onclick = () => {
     }, 400);
   });
 });
+
 
