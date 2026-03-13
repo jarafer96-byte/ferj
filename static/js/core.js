@@ -926,6 +926,7 @@ function agregarAlCarritoDOM(nombre, idPrecioSpan, idCantidad, id_base, grupo = 
       talle: talleElegido,
       grupo, 
       subgrupo 
+      imagen_url: imagenUrlDelProducto
     };
     window.carrito.push(nuevoItem);
   }
@@ -1546,6 +1547,7 @@ document.getElementById('loginToggleBtn').onclick = () => {
     }, 400);
   });
 });
+
 
 
 
