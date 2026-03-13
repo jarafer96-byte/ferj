@@ -260,6 +260,7 @@ function renderProducto(p, esLCP = false) {
   const nombreEscapado = p.nombre.replace(/'/g, "\\'").replace(/"/g, '\\"');
   const descripcionEscapada = (p.descripcion || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
   const imagenUrl = p.imagen_url || '/static/img/fallback.webp';
+  const imagenUrlEscapada = imagenUrl.replace(/'/g, "\\'");
   const grupoEscapado = (p.grupo || "").replace(/'/g, "\\'");
   const subgrupoEscapado = (p.subgrupo || "").replace(/'/g, "\\'");
 
@@ -267,10 +268,7 @@ function renderProducto(p, esLCP = false) {
     foto.replace(/'/g, "\\'").replace(/"/g, '\\"')
   );
   
-const imagenUrl = p.imagen_url || '/static/img/fallback.webp';
-const imagenUrlEscapada = imagenUrl.replace(/'/g, "\\'");
-
-const onclickAgregar = `agregarAlCarritoDOM('${nombreEscapado}', 'precio_${p.id_base}', 'cantidad_${p.id_base}', '${p.id_base}', '${grupoEscapado}', '${subgrupoEscapado}', '${imagenUrlEscapada}')`;
+  const onclickAgregar = `agregarAlCarritoDOM('${nombreEscapado}', 'precio_${p.id_base}', 'cantidad_${p.id_base}', '${p.id_base}', '${grupoEscapado}', '${subgrupoEscapado}', '${imagenUrlEscapada}')`;
   
   let whatsappUrl = configWhatsApp;
   
@@ -1550,6 +1548,7 @@ document.getElementById('loginToggleBtn').onclick = () => {
     }, 400);
   });
 });
+
 
 
 
