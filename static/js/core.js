@@ -697,7 +697,7 @@ function mostrarSubgrupo(subgrupo, event) {
 window.mostrarSubgrupo = mostrarSubgrupo;
 
 function sincronizarPreciosDelCarrito() {
-  carrito.forEach(item => {
+  window.carrito.forEach(item => {
     const idPrecio = "precio_" + (item.id_base || item.nombre.replace(/ /g, "_"));
     const precioSpan = document.getElementById(idPrecio);
     if (precioSpan) {
@@ -719,7 +719,7 @@ function actualizarCarrito(conAnimacion = false) {
   lista.innerHTML = '';
   let suma = 0;
 
-  if (carrito.length === 0) {
+  if (window.carrito.length === 0) {
     lista.innerHTML = "<li>🛒 Carrito vacío</li>";
     totalSpan.textContent = "0.00";
     const contadorSpan = document.getElementById('carrito-contador');
@@ -734,7 +734,7 @@ function actualizarCarrito(conAnimacion = false) {
 
   const escape = str => (str || '').replace(/'/g, "\\'");
 
-  carrito.forEach(item => {
+  window.carrito.forEach(item => {
     const subtotal = item.precio * item.cantidad;
     suma += subtotal;
     
@@ -927,7 +927,7 @@ function agregarAlCarritoDOM(nombre, idPrecioSpan, idCantidad, id_base, grupo = 
       grupo, 
       subgrupo 
     };
-    carrito.push(nuevoItem);
+    window.carrito.push(nuevoItem);
   }
   
   actualizarCarrito(true);
@@ -1546,5 +1546,6 @@ document.getElementById('loginToggleBtn').onclick = () => {
     }, 400);
   });
 });
+
 
 
