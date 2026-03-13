@@ -870,7 +870,7 @@ window.matchMedia("(max-width: 767px)").addEventListener('change', (e) => {
 });
 
 
-function agregarAlCarritoDOM(nombre, idPrecioSpan, idCantidad, id_base, grupo = "", subgrupo = "") {
+function agregarAlCarritoDOM(nombre, idPrecioSpan, idCantidad, id_base, grupo = "", subgrupo = "", imagenUrl = "") {
   const cantidadInput = document.getElementById(idCantidad);
   const precioSpan = document.getElementById(idPrecioSpan);
   const talleSelect = document.getElementById(`talle_${id_base}`);
@@ -904,7 +904,8 @@ function agregarAlCarritoDOM(nombre, idPrecioSpan, idCantidad, id_base, grupo = 
   
   const precio = parseFloat(precioSpan.textContent.replace("$", "").replace(",", "")) || 0;
   
-  const existente = carrito.find(item => 
+  // Buscar en window.carrito
+  const existente = window.carrito.find(item => 
     item.id_base === id_base && 
     item.talle === talleElegido
   );
@@ -927,7 +928,7 @@ function agregarAlCarritoDOM(nombre, idPrecioSpan, idCantidad, id_base, grupo = 
       talle: talleElegido,
       grupo, 
       subgrupo, 
-      imagen_url: imagenUrl
+      imagen_url: imagenUrl   // ← ahora imagenUrl está definida
     };
     window.carrito.push(nuevoItem);
   }
@@ -1548,6 +1549,7 @@ document.getElementById('loginToggleBtn').onclick = () => {
     }, 400);
   });
 });
+
 
 
 
