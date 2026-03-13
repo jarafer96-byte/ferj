@@ -267,7 +267,8 @@ function renderProducto(p, esLCP = false) {
     foto.replace(/'/g, "\\'").replace(/"/g, '\\"')
   );
   
-  const onclickAgregar = `agregarAlCarritoDOM('${nombreEscapado}', 'precio_${p.id_base}', 'cantidad_${p.id_base}', '${p.id_base}', '${grupoEscapado}', '${subgrupoEscapado}')`;
+  const imagenUrlEscapada = imagenUrl.replace(/'/g, "\\'");
+  const onclickAgregar = `agregarAlCarritoDOM('${nombreEscapado}', 'precio_${p.id_base}', 'cantidad_${p.id_base}', '${p.id_base}', '${grupoEscapado}', '${subgrupoEscapado}', '${imagenUrlEscapada}')`;
   
   let whatsappUrl = configWhatsApp;
   
@@ -1547,6 +1548,7 @@ document.getElementById('loginToggleBtn').onclick = () => {
     }, 400);
   });
 });
+
 
 
 
