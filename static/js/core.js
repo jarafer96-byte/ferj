@@ -7,7 +7,6 @@ const usarFirestore = false;
 let paginaActual = 1;
 let productosFiltradosActuales = [];
 let isMobile = window.matchMedia("(max-width: 767px)").matches;
-let carrito = [];
 let scrollTimer;
 let isScrolling = false;
 window.stockPorTalleData = {};
@@ -1610,4 +1609,5 @@ document.getElementById('loginToggleBtn').onclick = () => {
       }, 300);
     }, 400);
   });
+
 });
