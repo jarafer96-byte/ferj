@@ -2,6 +2,36 @@ window.fotoOptimizada = null;
 window.fotosAdicionalesExistentes = null;
 window.productoEditandoId = null;
 
+
+
+
+const formImages = new Map(); 
+
+function generarFormId() {
+  return 'form_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+function crearFormulario(producto = null) {
+  const template = document.getElementById('productFormTemplate');
+  const clone = template.content.cloneNode(true);
+  const formDiv = clone.querySelector('.admin-card');
+  const formId = generarFormId();
+  formDiv.dataset.formId = formId;
+
+  formImages.set(formId, { fotoOptimizada: null, fotosAdicionales: [] });
+
+  if (producto) {
+    rellenarFormulario(formDiv, producto);
+  }
+  configurarEventosFormulario(formDiv);
+  document.getElementById('formsList').appendChild(formDiv);
+}
+
+
+
+
+
+
+
 function abrirConfigMercadoPago() {
     console.log("⚙️ Redirigiendo a configuración de Mercado Pago...");
     const urlRetorno = window.location.href;
