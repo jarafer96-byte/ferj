@@ -10,23 +10,38 @@ const formImages = new Map();
 function generarFormId() {
   return 'form_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
-function crearFormulario(producto = null, idBase = null) {
+function crearFormulario(producto = null, opciones = {}) {
+  const { esEdicion = false } = opciones;
   const template = document.getElementById('productFormTemplate');
   const clone = template.content.cloneNode(true);
   const formDiv = clone.querySelector('.admin-card');
   const formId = generarFormId();
   formDiv.dataset.formId = formId;
-  if (idBase) formDiv.dataset.idBase = idBase; // Guardar ID para edición
+  if (esEdicion && producto?.id_base) {
+    formDiv.dataset.idBase = producto.id_base; // Guardar ID para edición
+  }
 
-  formImages.set(formId, { fotoOptimizada: null, fotosAdicionales: [] });
+  // Inicializar estado de imágenes
+  const estadoImagenes = { fotoOptimizada: null, fotosAdicionales: [] };
+  if (esEdicion && producto) {
+    // Si es edición, guardamos las URLs existentes en el estado
+    if (producto.imagen_url) {
+      estadoImagenes.imagenExistente = producto.imagen_url;
+    }
+    if (producto.fotos_adicionales && producto.fotos_adicionales.length) {
+      estadoImagenes.fotosExistentes = producto.fotos_adicionales.slice(); // copia
+    }
+  }
+  formImages.set(formId, estadoImagenes);
 
   if (producto) {
-    rellenarFormulario(formDiv, producto);
+    rellenarFormulario(formDiv, producto, esEdicion); // pasamos esEdicion
   }
   configurarEventosFormulario(formDiv);
   document.getElementById('formsList').appendChild(formDiv);
 }
-function rellenarFormulario(formDiv, producto) {
+function rellenarFormulario(formDiv, producto, esEdicion = false) {
+  // Rellenar campos de texto (siempre)
   formDiv.querySelector('.nombreProd').value = producto.nombre || '';
   formDiv.querySelector('.precioProd').value = producto.precio || '';
   formDiv.querySelector('.descripcionProd').value = producto.descripcion || '';
@@ -34,6 +49,7 @@ function rellenarFormulario(formDiv, producto) {
   formDiv.querySelector('.subgrupoProd').value = producto.subgrupo || '';
   formDiv.querySelector('.tallesProd').value = producto.talles ? producto.talles.join(', ') : '';
 
+  // Stock (igual)
   const tallesArray = producto.talles || [];
   const stockSimple = formDiv.querySelector('.stockSimple');
   const stockPorTalleContainer = formDiv.querySelector('.stockPorTalleContainer');
@@ -54,6 +70,77 @@ function rellenarFormulario(formDiv, producto) {
     stockSimple.style.display = 'block';
     stockPorTalleContainer.style.display = 'none';
     stockGeneral.value = producto.stock || 0;
+  }
+
+  // Si es edición, cargar imágenes existentes
+  if (esEdicion) {
+    const formId = formDiv.dataset.formId;
+    const images = formImages.get(formId);
+    const previewFoto = formDiv.querySelector('.previewFoto');
+    const btnQuitarFoto = formDiv.querySelector('.btnQuitarFoto');
+    const previewAdicionales = formDiv.querySelector('.previewFotosAdicionales');
+
+    // Imagen principal existente
+    if (producto.imagen_url) {
+      previewFoto.src = producto.imagen_url;
+      previewFoto.classList.remove('d-none');
+      btnQuitarFoto.classList.remove('d-none'); // Permitir quitar si se desea
+      // Nota: no guardamos en fotoOptimizada, sino que usaremos imagenExistente al guardar
+    }
+
+    // Fotos adicionales existentes
+    if (producto.fotos_adicionales && producto.fotos_adicionales.length) {
+      producto.fotos_adicionales.forEach((url, index) => {
+        const miniaturaDiv = document.createElement('div');
+        miniaturaDiv.style.position = 'relative';
+        miniaturaDiv.style.display = 'inline-block';
+        // Podríamos asignar un id único basado en la URL, pero es más sencillo usar índice
+        const id = 'existente_' + index + '_' + Date.now();
+        miniaturaDiv.dataset.id = id;
+
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.width = '60px';
+        img.style.height = '60px';
+        img.style.objectFit = 'cover';
+        img.style.margin = '3px';
+        img.style.borderRadius = '4px';
+
+        const btnEliminar = document.createElement('button');
+        btnEliminar.textContent = '✖';
+        btnEliminar.style.position = 'absolute';
+        btnEliminar.style.top = '-5px';
+        btnEliminar.style.right = '-5px';
+        btnEliminar.style.background = 'red';
+        btnEliminar.style.color = 'white';
+        btnEliminar.style.border = 'none';
+        btnEliminar.style.borderRadius = '50%';
+        btnEliminar.style.width = '20px';
+        btnEliminar.style.height = '20px';
+        btnEliminar.style.cursor = 'pointer';
+        btnEliminar.style.fontSize = '12px';
+        btnEliminar.style.fontWeight = 'bold';
+        btnEliminar.style.display = 'flex';
+        btnEliminar.style.alignItems = 'center';
+        btnEliminar.style.justifyContent = 'center';
+        btnEliminar.style.lineHeight = '1';
+
+        btnEliminar.onclick = (e) => {
+          e.stopPropagation();
+          const id = miniaturaDiv.dataset.id;
+          // Eliminar del estado y del DOM
+          if (images.fotosExistentes) {
+            const index = images.fotosExistentes.indexOf(url);
+            if (index !== -1) images.fotosExistentes.splice(index, 1);
+          }
+          miniaturaDiv.remove();
+        };
+
+        miniaturaDiv.appendChild(img);
+        miniaturaDiv.appendChild(btnEliminar);
+        previewAdicionales.appendChild(miniaturaDiv);
+      });
+    }
   }
 }
 function configurarEventosFormulario(formDiv) {
