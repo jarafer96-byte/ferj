@@ -431,6 +431,14 @@ async function guardarProducto(producto, formDiv) {
 if (window.modoAdmin) {
   const container = document.getElementById('adminFormsContainer');
   if (container) container.classList.remove('d-none');
+
+  // Mostrar botón de salir de admin
+  const logoutWrapper = document.getElementById('logoutAdminWrapper');
+  if (logoutWrapper) logoutWrapper.style.display = 'block';
+
+  // Mostrar botón de configurar Mercado Pago (si existe)
+  const configMP = document.getElementById('configurarMP');
+  if (configMP) configMP.classList.remove('d-none');
 }
 document.getElementById('nuevoFormBtn').addEventListener('click', () => {
   crearFormulario();
