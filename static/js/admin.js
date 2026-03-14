@@ -14,7 +14,7 @@ function editarProductoDesdeCard(id_base) {
   }
   const container = document.getElementById('adminFormsContainer');
   if (container) container.classList.remove('d-none');
-  crearFormulario(productoOriginal, true); // true = esEdicion
+  crearFormulario(productoOriginal, { esEdicion: true }); // ✅ CORREGIDO
 }
 function generarFormId() {
   return 'form_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -286,7 +286,7 @@ function configurarEventosFormulario(formDiv) {
 
   formDiv.querySelector('.duplicar-btn').addEventListener('click', async () => {
     const productoActual = await obtenerDatosFormulario(formDiv, false); 
-    crearFormulario(productoActual, false);
+    crearFormulario(productoActual);
   });
 
   formDiv.querySelector('.eliminar-btn').addEventListener('click', () => {
@@ -448,7 +448,6 @@ function duplicarProductoDesdeCard(id_base) {
   }
   const container = document.getElementById('adminFormsContainer');
   if (container) container.classList.remove('d-none');
-  // Crear copia sin imágenes
   const copia = {
     nombre: productoOriginal.nombre,
     precio: productoOriginal.precio,
@@ -459,9 +458,8 @@ function duplicarProductoDesdeCard(id_base) {
     stock_por_talle: productoOriginal.stock_por_talle,
     stock: productoOriginal.stock
   };
-  crearFormulario(copia, false); // false = no es edición (sin imágenes)
+  crearFormulario(copia); // ✅ SIN segundo argumento (equivale a { esEdicion: false })
 }
-
 
 
 
@@ -557,27 +555,6 @@ document.getElementById("btnQuitarFoto")?.addEventListener("click", () => {
   document.getElementById("btnQuitarFoto").classList.add("d-none");
   window.fotoOptimizada = null;
 });
-
-function cargarProductoCompletoParaEditar(id_base) {
-  const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
-  if (!productoOriginal) {
-    alert("❌ Producto no encontrado");
-    return;
-  }
-
-  const container = document.getElementById('adminFormsContainer');
-  if (container) container.classList.remove('d-none');
-
-  const copia = {
-    ...productoOriginal,
-    // Si quieres que las imágenes se carguen en el formulario, inclúyelas:
-    imagen_url: productoOriginal.imagen_url,
-    fotos_adicionales: productoOriginal.fotos_adicionales || []
-  };
-
-  // Llamar a crearFormulario con la copia y el id_base para saber que es edición
-  crearFormulario(copia, id_base);
-}
 
 function cargarProductoEnFormulario(producto) {
   console.log("📝 Cargando producto para editar:", producto.nombre);
