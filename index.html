@@ -218,8 +218,7 @@ h1, h2, h3, .btn, .card { font-family: 'Raleway', sans-serif; }
   </button>
 
 <div id="contenedor-grupos"></div>
-  
-<!-- Contenedor de formularios múltiples (inicialmente oculto, se muestra en modo admin) -->
+
 <div id="adminFormsContainer" class="d-none">
   <div class="d-flex justify-content-between mb-3">
     <h5>Gestión de productos</h5>
@@ -235,7 +234,6 @@ h1, h2, h3, .btn, .card { font-family: 'Raleway', sans-serif; }
 <template id="productFormTemplate">
   <div class="card producto-card admin-card">
     <div class="card-body">
-      <!-- Cabecera con botones de duplicar/eliminar -->
       <div class="d-flex justify-content-between mb-2">
         <div>
           <button type="button" class="btn btn-sm btn-info duplicar-btn" style="background-color: #dfba03; border-color: #dfba03;">
@@ -245,12 +243,10 @@ h1, h2, h3, .btn, .card { font-family: 'Raleway', sans-serif; }
         </div>
       </div>
 
-      <!-- Imagen principal -->
       <img class="previewFoto d-none w-100 mb-2" src="" alt="Sin foto">
       <input type="file" class="inputFoto form-control mb-2" accept="image/*">
       <button type="button" class="btnQuitarFoto btn btn-danger mb-2 d-none">❌ Quitar foto</button>
 
-      <!-- Fotos adicionales -->
       <div class="mb-2">
         <label class="form-label">Fotos adicionales (opcional)</label>
         <input type="file" class="fotosAdicionales form-control" accept="image/*" multiple>
@@ -258,29 +254,24 @@ h1, h2, h3, .btn, .card { font-family: 'Raleway', sans-serif; }
         <div class="previewFotosAdicionales mt-2"></div>
       </div>
 
-      <!-- Campos de texto -->
       <input type="text" class="nombreProd form-control mb-2" placeholder="Nombre producto *">
       <input type="number" class="precioProd form-control mb-2" placeholder="Precio *">
       <textarea class="descripcionProd form-control mb-2 preservar-saltos" rows="3" placeholder="Descripción del producto (opcional)"></textarea>
       <input type="text" class="tallesProd form-control mb-2" placeholder="Talles (S,M,L)">
 
-      <!-- Stock simple (visible por defecto) -->
       <div class="stockSimple mb-2">
         <input type="number" class="stockGeneral form-control" placeholder="Stock inicial" min="0" value="0">
       </div>
 
-      <!-- Stock por talle (oculto inicialmente) -->
       <div class="stockPorTalleContainer mb-2" style="display:none;">
         <label class="form-label">Stock por talle (ej: S:5, M:3, L:2)</label>
         <input type="text" class="stockPorTalle form-control" placeholder="S:5, M:3, L:2">
         <small class="text-muted">Separar por comas: talle:cantidad</small>
       </div>
 
-      <!-- Grupo y subgrupo -->
       <input type="text" class="grupoProd form-control mb-2" list="grupos-sugeridos" placeholder="Grupo *">
       <input type="text" class="subgrupoProd form-control mb-2" list="subgrupos-sugeridos" placeholder="Subgrupo *">
-      
-      <!-- Botón guardar este -->
+ 
       <div class="mt-2">
         <button type="button" class="btn btn-success btn-sm guardar-this">✅ Guardar este</button>
       </div>
