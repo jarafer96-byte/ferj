@@ -485,7 +485,7 @@ function renderProducto(p, esLCP = false) {
       📋 Duplicar
     </button>
     <button type="button" class="btn btn-warning btn-sm flex-fill"
-      onclick="cargarProductoCompletoParaEditar('${p.id_base}')">
+      onclick="editarProductoDesdeCard('${p.id_base}')">
       ✏️ Editar
     </button>
     <button type="button" class="btn btn-danger btn-sm flex-fill"
