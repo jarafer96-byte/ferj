@@ -1,47 +1,38 @@
-/* Para la previsualización de la foto principal dentro del formulario */
 .admin-card .previewFoto {
   max-height: 150px;
   width: auto;
   object-fit: contain;
-  margin: 0 auto 0.5rem auto; /* centrado y margen inferior */
-  display: block; /* para que el margin auto funcione */
+  margin: 0 auto 0.5rem auto; 
+  display: block; 
 }
-/* Contenedor principal de la cuadrícula */
 #formsList {
   display: grid;
-  grid-template-columns: repeat(1, 1fr); /* Por defecto, 1 columna (móvil) */
+  grid-template-columns: repeat(1, 1fr); 
   gap: 1rem;
-  max-height: 800px; /* Altura máxima para que aparezca scroll vertical */
+  max-height: 800px; 
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-width: thin;
   scrollbar-color: #888 #333;
 }
-
-/* Cada formulario ocupa el ancho de su columna */
 #formsList .admin-card {
   width: 100%;
-  margin: 0; /* El gap ya separa */
+  margin: 0; 
   box-sizing: border-box;
 }
 #formList .admin-card {
-  display: block !important; /* Fuerza a bloque */
+  display: block !important; 
 }
-/* Tablets: 2 columnas */
 @media (min-width: 576px) {
   #formsList {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
-/* Escritorio: 3 columnas */
 @media (min-width: 992px) {
   #formsList {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-
-/* Estilo de la barra de scroll (opcional) */
 #formsList::-webkit-scrollbar {
   width: 8px;
 }
@@ -53,20 +44,6 @@
   background: #888;
   border-radius: 4px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #paginacion button.active {
   background-color: #007bff;
   color: white;
