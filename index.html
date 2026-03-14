@@ -206,14 +206,14 @@ h1, h2, h3, .btn, .card { font-family: 'Raleway', sans-serif; }
     
     <div class="contenedor-panel">
         <button class="flecha-scroll flecha-izq" style="display: none;">‹</button>
-        <div class="panelGrupos" class="panel-grupos oculta">
+        <div id="panelGrupos" class="panel-grupos oculta">
         </div>
         <button class="flecha-scroll flecha-der" style="display: none;">›</button>
     </div>
 
     <div class="contenedor-panel">
         <button class="flecha-scroll flecha-izq" style="display: none;">‹</button>
-        <div class="panelSubcategorias" class="panel-subcategorias oculta">
+        <div id="panelSubcategorias" class="panel-subcategorias oculta">
         </div>
         <button class="flecha-scroll flecha-der" style="display: none;">›</button>
      </div>
@@ -288,9 +288,9 @@ h1, h2, h3, .btn, .card { font-family: 'Raleway', sans-serif; }
 
       <!-- Grupo y subgrupo -->
       <input type="text" class="grupoProd form-control mb-2" list="grupos-sugeridos" placeholder="Grupo *">
-      <datalist class="grupos-sugeridos"></datalist>
+      <datalist id="grupos-sugeridos"></datalist>
       <input type="text" class="subgrupoProd form-control mb-2" list="subgrupos-sugeridos" placeholder="Subgrupo *">
-      <datalist class="subgrupos-sugeridos"></datalist>
+      <datalist id="subgrupos-sugeridos"></datalist>
 
       <!-- Botón guardar este -->
       <div class="mt-2">
