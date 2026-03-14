@@ -460,9 +460,24 @@ document.getElementById("btnQuitarFoto")?.addEventListener("click", () => {
 });
 
 function cargarProductoCompletoParaEditar(id_base) {
-  const producto = window.todosLosProductos?.find(p => p.id_base === id_base);
-  if (producto) cargarProductoEnFormulario(producto);
-  else alert("❌ No se encontró el producto para editar");
+  const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
+  if (!productoOriginal) {
+    alert("❌ Producto no encontrado");
+    return;
+  }
+
+  const container = document.getElementById('adminFormsContainer');
+  if (container) container.classList.remove('d-none');
+
+  const copia = {
+    ...productoOriginal,
+    // Si quieres que las imágenes se carguen en el formulario, inclúyelas:
+    imagen_url: productoOriginal.imagen_url,
+    fotos_adicionales: productoOriginal.fotos_adicionales || []
+  };
+
+  // Llamar a crearFormulario con la copia y el id_base para saber que es edición
+  crearFormulario(copia, id_base);
 }
 
 function cargarProductoEnFormulario(producto) {
