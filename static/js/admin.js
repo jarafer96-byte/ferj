@@ -438,12 +438,9 @@ function duplicarProductoDesdeCard(id_base) {
     alert("❌ Producto no encontrado");
     return;
   }
-
-  // Mostrar el contenedor de formularios (por si estaba oculto)
   const container = document.getElementById('adminFormsContainer');
   if (container) container.classList.remove('d-none');
-
-  // Crear una copia del producto SIN imágenes
+  // Crear copia sin imágenes
   const copia = {
     nombre: productoOriginal.nombre,
     precio: productoOriginal.precio,
@@ -453,11 +450,8 @@ function duplicarProductoDesdeCard(id_base) {
     talles: productoOriginal.talles,
     stock_por_talle: productoOriginal.stock_por_talle,
     stock: productoOriginal.stock
-    // No copiar imagen_url ni fotos_adicionales
   };
-
-  // Llamar a crearFormulario con la copia
-  crearFormulario(copia);
+  crearFormulario(copia, false); // false = no es edición (sin imágenes)
 }
 
 
