@@ -1,46 +1,46 @@
+/* Contenedor principal de la cuadrícula */
 #formsList {
-  display: flex;
-  flex-direction: row;
-  overflow-x: auto;
-  overflow-y: hidden;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr); /* Por defecto, 1 columna (móvil) */
   gap: 1rem;
-  padding: 0 10px 10px 10px;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  max-height: none;
+  max-height: 800px; /* Altura máxima para que aparezca scroll vertical */
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #888 #333;
 }
 
+/* Cada formulario ocupa el ancho de su columna */
 #formsList .admin-card {
-  flex: 0 0 auto;
-  width: 90%;
-  max-width: 350px;
-  scroll-snap-align: start;
+  width: 100%;
+  margin: 0; /* El gap ya separa */
+  box-sizing: border-box;
 }
 
+/* Tablets: 2 columnas */
+@media (min-width: 576px) {
+  #formsList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Escritorio: 3 columnas */
 @media (min-width: 992px) {
   #formsList {
-    flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: auto;
-    max-height: 800px;
-    padding-right: 10px;
-    scroll-snap-type: none;
-  }
-  #formsList .admin-card {
-    width: 100%;
-    max-width: none;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-#adminFormsContainer {
-  max-width: 900px;
-  margin: 0 auto;
+/* Pantallas muy grandes: 4 columnas (opcional) */
+@media (min-width: 1200px) {
+  #formsList {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-/* Estilos de la barra de scroll (opcional) */
+/* Estilo de la barra de scroll (opcional) */
 #formsList::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
 #formsList::-webkit-scrollbar-track {
   background: #333;
