@@ -316,8 +316,9 @@ function configurarEventosFormulario(formDiv) {
     formDiv.remove();
     // Opcional: crear un nuevo formulario vacío automáticamente
     // crearFormulario();
-  }
-});
+    }
+  });
+}  
 async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
   const formId = formDiv.dataset.formId;
   const images = formImages.get(formId);
