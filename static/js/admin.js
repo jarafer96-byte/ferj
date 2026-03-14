@@ -304,10 +304,20 @@ function configurarEventosFormulario(formDiv) {
   });
 
   formDiv.querySelector('.guardar-this').addEventListener('click', async () => {
-    const producto = await obtenerDatosFormulario(formDiv, true);
-    await guardarProducto(producto, formDiv);
-  });
-}
+  const producto = await obtenerDatosFormulario(formDiv, true);
+  const exito = await guardarProducto(producto, formDiv);
+  if (exito) {
+    // Liberar URLs de objetos
+    if (images.fotoOptimizada) {
+      URL.revokeObjectURL(previewFoto.src);
+    }
+    images.fotosAdicionales.forEach(item => URL.revokeObjectURL(item.url));
+    formImages.delete(formId);
+    formDiv.remove();
+    // Opcional: crear un nuevo formulario vacío automáticamente
+    // crearFormulario();
+  }
+});
 async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
   const formId = formDiv.dataset.formId;
   const images = formImages.get(formId);
@@ -375,10 +385,10 @@ async function guardarProducto(producto, formDiv) {
   const email = window.cliente?.email;
   if (!email) {
     alert("❌ No hay email de admin, no se puede guardar");
-    throw new Error("Email no disponible");
+    return false;
   }
 
-  const idBase = formDiv?.dataset.idBase; // Puede ser undefined si es nuevo
+  const idBase = formDiv?.dataset.idBase;
   const esEdicion = !!idBase;
 
   const payload = {
@@ -403,17 +413,17 @@ async function guardarProducto(producto, formDiv) {
     const data = await resp.json();
     if (data.status === "ok") {
       console.log("✅ Producto guardado:", data);
-      // Opcional: mostrar notificación
       if (typeof mostrarToast === 'function') {
         mostrarToast(`✅ ${producto.nombre} guardado`);
       }
+      return true;
     } else {
       throw new Error(data.error || data.message || "Error al guardar producto");
     }
   } catch (err) {
     console.error("❌ Error guardando producto:", err);
     alert("❌ Error: " + err.message);
-    throw err;
+    return false;
   }
 }
 
@@ -429,16 +439,43 @@ document.getElementById('guardarTodosBtn').addEventListener('click', async () =>
   const forms = document.querySelectorAll('#formsList .admin-card');
   let okCount = 0;
   let errorCount = 0;
+
   for (const form of forms) {
     try {
-      const producto = await obtenerDatosFormulario(form, true); // incluir imágenes
-      await guardarProducto(producto, form); // pasar el formulario
-      okCount++;
+      const producto = await obtenerDatosFormulario(form, true);
+      const exito = await guardarProducto(producto, form);
+      if (exito) {
+        okCount++;
+      } else {
+        errorCount++;
+      }
     } catch (err) {
       errorCount++;
     }
   }
-  alert(`✅ ${okCount} productos guardados, ❌ ${errorCount} errores.`);
+
+  if (errorCount === 0) {
+    // Eliminar todos los formularios y limpiar estado
+    forms.forEach(form => {
+      const formId = form.dataset.formId;
+      const images = formImages.get(formId);
+      if (images) {
+        if (images.fotoOptimizada) {
+          const previewFoto = form.querySelector('.previewFoto');
+          if (previewFoto.src) URL.revokeObjectURL(previewFoto.src);
+        }
+        images.fotosAdicionales.forEach(item => URL.revokeObjectURL(item.url));
+        formImages.delete(formId);
+      }
+      form.remove();
+    });
+    alert(`✅ ${okCount} productos guardados correctamente.`);
+    // Opcional: crear un nuevo formulario vacío
+    // crearFormulario();
+  } else {
+    alert(`✅ ${okCount} productos guardados, ❌ ${errorCount} errores. Revisa los que fallaron.`);
+    // No eliminamos ninguno para que el usuario pueda corregir
+  }
 });
 function duplicarProductoDesdeCard(id_base) {
   const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
