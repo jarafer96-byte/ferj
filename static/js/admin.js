@@ -187,8 +187,8 @@ function configurarEventosFormulario(formDiv) {
     }
   });
 
-  formDiv.querySelector('.duplicar-btn').addEventListener('click', () => {
-    const productoActual = obtenerDatosFormulario(formDiv, false);
+  formDiv.querySelector('.duplicar-btn').addEventListener('click', async () => {
+    const productoActual = await obtenerDatosFormulario(formDiv, false); 
     crearFormulario(productoActual);
   });
 
