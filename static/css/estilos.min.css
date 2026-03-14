@@ -1,3 +1,11 @@
+/* Para la previsualización de la foto principal dentro del formulario */
+.admin-card .previewFoto {
+  max-height: 150px;
+  width: auto;
+  object-fit: contain;
+  margin: 0 auto 0.5rem auto; /* centrado y margen inferior */
+  display: block; /* para que el margin auto funcione */
+}
 /* Contenedor principal de la cuadrícula */
 #formsList {
   display: grid;
