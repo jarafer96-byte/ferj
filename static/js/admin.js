@@ -311,7 +311,6 @@ function configurarEventosFormulario(formDiv) {
 async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
   const formId = formDiv.dataset.formId;
   const images = formImages.get(formId);
-
   const producto = {
     nombre: formDiv.querySelector('.nombreProd').value.trim(),
     precio: parseFloat(formDiv.querySelector('.precioProd').value),
@@ -320,7 +319,7 @@ async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
     subgrupo: formDiv.querySelector('.subgrupoProd').value.trim() || 'general',
     talles: formDiv.querySelector('.tallesProd').value.split(',').map(t => t.trim()).filter(Boolean)
   };
-
+  // Stock (igual)
   const stockSimpleDiv = formDiv.querySelector('.stockSimple');
   if (stockSimpleDiv.style.display !== 'none') {
     producto.stock = parseInt(formDiv.querySelector('.stockGeneral').value) || 0;
@@ -335,20 +334,27 @@ async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
   }
 
   if (incluirImagenes) {
+    // Imagen principal: si hay nueva, se sube; si no, se usa la existente
     if (images.fotoOptimizada) {
-      const url = await subirImagen(images.fotoOptimizada);
-      producto.imagen_url = url;
+      producto.imagen_url = await subirImagen(images.fotoOptimizada);
+    } else if (images.imagenExistente) {
+      producto.imagen_url = images.imagenExistente; // ya está en el bucket
     } else {
       producto.imagen_url = null;
     }
+
+    // Fotos adicionales: combinar las existentes con las nuevas
+    producto.fotos_adicionales = [];
+    // Añadir existentes
+    if (images.fotosExistentes && images.fotosExistentes.length) {
+      producto.fotos_adicionales.push(...images.fotosExistentes);
+    }
+    // Subir y añadir nuevas
     if (images.fotosAdicionales.length > 0) {
-      producto.fotos_adicionales = [];
       for (const item of images.fotosAdicionales) {
         const url = await subirImagen(item.blob);
         producto.fotos_adicionales.push(url);
       }
-    } else {
-      producto.fotos_adicionales = [];
     }
   }
   return producto;
