@@ -371,19 +371,24 @@ async function subirImagen(blob) {
   if (data.ok && data.url) return data.url;
   throw new Error('Error al subir imagen');
 }
-async function guardarProducto(producto) {
+async function guardarProducto(producto, formDiv) {
   const email = window.cliente?.email;
   if (!email) {
     alert("❌ No hay email de admin, no se puede guardar");
     throw new Error("Email no disponible");
   }
 
-  // Preparar payload (similar a btnConfirmarProd)
+  const idBase = formDiv?.dataset.idBase; // Puede ser undefined si es nuevo
+  const esEdicion = !!idBase;
+
   const payload = {
     producto: producto,
     email: email,
-    es_edicion: false // Por ahora siempre creación (puedes ajustar si tienes edición)
+    es_edicion: esEdicion
   };
+  if (esEdicion) {
+    payload.producto.id_base = idBase;
+  }
 
   try {
     const resp = await fetch("https://mpagina.onrender.com/guardar-producto", {
@@ -391,17 +396,14 @@ async function guardarProducto(producto) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-
     if (!resp.ok) {
       const text = await resp.text();
       throw new Error(`Error HTTP ${resp.status}: ${text.substring(0, 200)}`);
     }
-
     const data = await resp.json();
     if (data.status === "ok") {
       console.log("✅ Producto guardado:", data);
-      // Opcional: mostrar notificación breve
-      // Puedes usar mostrarToast si está disponible
+      // Opcional: mostrar notificación
       if (typeof mostrarToast === 'function') {
         mostrarToast(`✅ ${producto.nombre} guardado`);
       }
@@ -411,7 +413,7 @@ async function guardarProducto(producto) {
   } catch (err) {
     console.error("❌ Error guardando producto:", err);
     alert("❌ Error: " + err.message);
-    throw err; // Para que quien llama sepa que falló
+    throw err;
   }
 }
 
