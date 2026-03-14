@@ -149,22 +149,13 @@ h1, h2, h3, .btn, .card { font-family: 'Raleway', sans-serif; }
       document.head.appendChild(style);
 
       if (window.modoAdmin) {
-        document.addEventListener('DOMContentLoaded', function() {
-          const adminCard = document.getElementById('adminCard');
-          const configMP = document.getElementById('configurarMP');
-          const logoutWrapper = document.getElementById('logoutAdminWrapper');
-          if (adminCard) adminCard.classList.remove('d-none');
-          if (configMP) configMP.classList.remove('d-none');
-          if (logoutWrapper) logoutWrapper.style.display = 'block';
-        });
-
         const script = document.createElement('script');
         script.src = 'static/js/admin.js';
         script.defer = true;
         document.head.appendChild(script);
       }
     })();
-</script>     
+</script>  
 </head>
 <body class="container modo-oscuro">
  <main>  
