@@ -1,36 +1,54 @@
-/* Contenedor de la lista de formularios (carrusel horizontal) */
 #formsList {
   display: flex;
   flex-direction: row;
   overflow-x: auto;
   overflow-y: hidden;
   gap: 1rem;
-  padding-bottom: 10px; /* espacio para la barra de scroll */
-  scroll-snap-type: x mandatory; /* opcional: para que se ajuste a los formularios */
+  padding: 0 10px 10px 10px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  max-height: none;
 }
 
-/* Cada formulario ocupa un ancho fijo en el carrusel */
 #formsList .admin-card {
   flex: 0 0 auto;
-  width: 100%; /* por defecto, en móvil ocupará todo el ancho del contenedor */
-  max-width: 350px; /* ancho aproximado de cada formulario */
-  scroll-snap-align: start; /* opcional */
+  width: 90%;
+  max-width: 350px;
+  scroll-snap-align: start;
 }
 
-/* En pantallas grandes, que se vean 3 a la vez */
 @media (min-width: 992px) {
   #formsList {
-    /* El contenedor no tiene ancho fijo, pero los formularios tienen su ancho */
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 800px;
+    padding-right: 10px;
+    scroll-snap-type: none;
   }
   #formsList .admin-card {
-    width: 350px; /* ancho fijo para que quepan 3 en fila */
+    width: 100%;
+    max-width: none;
   }
 }
 
-/* Ajustes para que el contenedor ocupe el ancho disponible */
 #adminFormsContainer {
-  width: 100%;
-  overflow: hidden; /* para que no se desborde el contenedor */
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Estilos de la barra de scroll (opcional) */
+#formsList::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+#formsList::-webkit-scrollbar-track {
+  background: #333;
+  border-radius: 4px;
+}
+#formsList::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
 }
 
 
