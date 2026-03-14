@@ -481,8 +481,7 @@ function renderProducto(p, esLCP = false) {
           
           ${window.modoAdmin ? `
   <div class="mt-2 d-flex gap-2">
-    <button type="button" class="btn btn-info btn-sm flex-fill"
-      onclick="duplicarProductoDesdeCard('${p.id_base}')">
+    <button type="button" class="btn btn-info btn-sm flex-fill" style="background-color: azure;" onclick="duplicarProductoDesdeCard('${p.id_base}')">
       📋 Duplicar
     </button>
     <button type="button" class="btn btn-warning btn-sm flex-fill"
