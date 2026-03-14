@@ -1,22 +1,36 @@
+/* Contenedor de la lista de formularios (carrusel horizontal) */
 #formsList {
-  max-height: 600px; /* Altura suficiente para unos 3 formularios (ajusta según el alto real de cada uno) */
-  overflow-y: auto;
-  padding-right: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: #888 #333;
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 1rem;
+  padding-bottom: 10px; /* espacio para la barra de scroll */
+  scroll-snap-type: x mandatory; /* opcional: para que se ajuste a los formularios */
 }
 
-/* Asegurar que cada formulario ocupe el ancho completo */
+/* Cada formulario ocupa un ancho fijo en el carrusel */
 #formsList .admin-card {
-  width: 100%;
-  margin-bottom: 1rem; /* Espacio entre formularios */
+  flex: 0 0 auto;
+  width: 100%; /* por defecto, en móvil ocupará todo el ancho del contenedor */
+  max-width: 350px; /* ancho aproximado de cada formulario */
+  scroll-snap-align: start; /* opcional */
 }
 
-/* En móviles, reducir aún más la altura para que se vea aproximadamente 1 formulario */
-@media (max-width: 768px) {
+/* En pantallas grandes, que se vean 3 a la vez */
+@media (min-width: 992px) {
   #formsList {
-    max-height: 400px; /* Aproximadamente 1 formulario */
+    /* El contenedor no tiene ancho fijo, pero los formularios tienen su ancho */
   }
+  #formsList .admin-card {
+    width: 350px; /* ancho fijo para que quepan 3 en fila */
+  }
+}
+
+/* Ajustes para que el contenedor ocupe el ancho disponible */
+#adminFormsContainer {
+  width: 100%;
+  overflow: hidden; /* para que no se desborde el contenedor */
 }
 
 
