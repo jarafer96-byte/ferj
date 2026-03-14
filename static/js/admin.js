@@ -289,6 +289,35 @@ document.getElementById('guardarTodosBtn').addEventListener('click', async () =>
   }
   alert('✅ Todos los productos guardados');
 });
+function duplicarProductoDesdeCard(id_base) {
+  const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
+  if (!productoOriginal) {
+    alert("❌ Producto no encontrado");
+    return;
+  }
+
+  // Mostrar el contenedor de formularios (por si estaba oculto)
+  const container = document.getElementById('adminFormsContainer');
+  if (container) container.classList.remove('d-none');
+
+  // Crear una copia del producto SIN imágenes
+  const copia = {
+    nombre: productoOriginal.nombre,
+    precio: productoOriginal.precio,
+    descripcion: productoOriginal.descripcion,
+    grupo: productoOriginal.grupo,
+    subgrupo: productoOriginal.subgrupo,
+    talles: productoOriginal.talles,
+    stock_por_talle: productoOriginal.stock_por_talle,
+    stock: productoOriginal.stock
+    // No copiar imagen_url ni fotos_adicionales
+  };
+
+  // Llamar a crearFormulario con la copia
+  crearFormulario(copia);
+}
+
+
 
 
 
