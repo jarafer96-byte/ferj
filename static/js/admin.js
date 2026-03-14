@@ -1194,7 +1194,7 @@ function loginAdmin(event) {
           loginForm.style.display = "none";
         }
         
-        location.href = `index.html?token=${data.token}`;
+        window.location.search = `?token=${data.token}`;
       } else {
         alert("❌ " + data.message);
       }
