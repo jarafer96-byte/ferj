@@ -286,7 +286,7 @@ function configurarEventosFormulario(formDiv) {
 
   formDiv.querySelector('.duplicar-btn').addEventListener('click', async () => {
     const productoActual = await obtenerDatosFormulario(formDiv, false); 
-    crearFormulario(productoActual);
+    crearFormulario(productoActual, false);
   });
 
   formDiv.querySelector('.eliminar-btn').addEventListener('click', () => {
