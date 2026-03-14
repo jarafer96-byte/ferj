@@ -16,7 +16,7 @@
   margin: 0; /* El gap ya separa */
   box-sizing: border-box;
 }
-#adminFormsContainer .admin-card {
+#formList .admin-card {
   display: block !important; /* Fuerza a bloque */
 }
 /* Tablets: 2 columnas */
