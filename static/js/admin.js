@@ -432,7 +432,7 @@ document.getElementById('guardarTodosBtn').addEventListener('click', async () =>
   for (const form of forms) {
     try {
       const producto = await obtenerDatosFormulario(form, true); // incluir imágenes
-      await guardarProducto(producto);
+      await guardarProducto(producto, form); // pasar el formulario
       okCount++;
     } catch (err) {
       errorCount++;
