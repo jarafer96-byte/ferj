@@ -25,6 +25,213 @@ function crearFormulario(producto = null) {
   configurarEventosFormulario(formDiv);
   document.getElementById('formsList').appendChild(formDiv);
 }
+function rellenarFormulario(formDiv, producto) {
+  formDiv.querySelector('.nombreProd').value = producto.nombre || '';
+  formDiv.querySelector('.precioProd').value = producto.precio || '';
+  formDiv.querySelector('.descripcionProd').value = producto.descripcion || '';
+  formDiv.querySelector('.grupoProd').value = producto.grupo || '';
+  formDiv.querySelector('.subgrupoProd').value = producto.subgrupo || '';
+  formDiv.querySelector('.tallesProd').value = producto.talles ? producto.talles.join(', ') : '';
+
+  const tallesArray = producto.talles || [];
+  const stockSimple = formDiv.querySelector('.stockSimple');
+  const stockPorTalleContainer = formDiv.querySelector('.stockPorTalleContainer');
+  const stockGeneral = formDiv.querySelector('.stockGeneral');
+  const stockPorTalleInput = formDiv.querySelector('.stockPorTalle');
+
+  if (tallesArray.length > 0) {
+    stockSimple.style.display = 'none';
+    stockPorTalleContainer.style.display = 'block';
+    if (producto.stock_por_talle) {
+      const stockStr = Object.entries(producto.stock_por_talle)
+        .map(([t, s]) => `${t}:${s}`).join(', ');
+      stockPorTalleInput.value = stockStr;
+    } else {
+      stockPorTalleInput.value = tallesArray.map(t => `${t}:0`).join(', ');
+    }
+  } else {
+    stockSimple.style.display = 'block';
+    stockPorTalleContainer.style.display = 'none';
+    stockGeneral.value = producto.stock || 0;
+  }
+}
+function configurarEventosFormulario(formDiv) {
+  const formId = formDiv.dataset.formId;
+  const images = formImages.get(formId);
+
+  const inputFoto = formDiv.querySelector('.inputFoto');
+  const previewFoto = formDiv.querySelector('.previewFoto');
+  const btnQuitarFoto = formDiv.querySelector('.btnQuitarFoto');
+
+  inputFoto.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const blobOptimizado = await optimizarImagen(file);
+      images.fotoOptimizada = blobOptimizado;
+      const urlPreview = URL.createObjectURL(blobOptimizado);
+      previewFoto.src = urlPreview;
+      previewFoto.classList.remove('d-none');
+      btnQuitarFoto.classList.remove('d-none');
+    } catch (err) {
+      alert('❌ No se pudo optimizar la imagen');
+    }
+  });
+
+  btnQuitarFoto.addEventListener('click', () => {
+    inputFoto.value = '';
+    previewFoto.src = '';
+    previewFoto.classList.add('d-none');
+    btnQuitarFoto.classList.add('d-none');
+    images.fotoOptimizada = null;
+  });
+
+  const fotosAdicionalesInput = formDiv.querySelector('.fotosAdicionales');
+  const previewAdicionales = formDiv.querySelector('.previewFotosAdicionales');
+
+  fotosAdicionalesInput.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+      try {
+        const blob = await optimizarImagen(file);
+        images.fotosAdicionales.push(blob);
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          img.style.width = '60px';
+          img.style.height = '60px';
+          img.style.objectFit = 'cover';
+          img.style.margin = '3px';
+          img.style.borderRadius = '4px';
+          previewAdicionales.appendChild(img);
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.warn('Error al optimizar foto adicional', err);
+      }
+    }
+  });
+
+  const tallesInput = formDiv.querySelector('.tallesProd');
+  const stockSimpleDiv = formDiv.querySelector('.stockSimple');
+  const stockPorTalleDiv = formDiv.querySelector('.stockPorTalleContainer');
+  const stockPorTalleInput = formDiv.querySelector('.stockPorTalle');
+
+  tallesInput.addEventListener('input', () => {
+    const talles = tallesInput.value.split(',').map(t => t.trim()).filter(Boolean);
+    if (talles.length > 0) {
+      stockSimpleDiv.style.display = 'none';
+      stockPorTalleDiv.style.display = 'block';
+      if (!stockPorTalleInput.value.trim()) {
+        stockPorTalleInput.value = talles.map(t => `${t}:0`).join(', ');
+      }
+    } else {
+      stockSimpleDiv.style.display = 'block';
+      stockPorTalleDiv.style.display = 'none';
+    }
+  });
+
+  formDiv.querySelector('.duplicar-btn').addEventListener('click', () => {
+    const productoActual = obtenerDatosFormulario(formDiv, incluirImagenes = false);
+    crearFormulario(productoActual); 
+  });
+
+  formDiv.querySelector('.eliminar-btn').addEventListener('click', () => {
+    if (confirm('¿Eliminar este formulario?')) {
+      const images = formImages.get(formId);
+      if (images.fotoOptimizada) URL.revokeObjectURL(previewFoto.src);
+      images.fotosAdicionales.forEach(blob => URL.revokeObjectURL(blob.url));
+      formImages.delete(formId);
+      formDiv.remove();
+    }
+  });
+
+  formDiv.querySelector('.guardar-this').addEventListener('click', async () => {
+    const producto = await obtenerDatosFormulario(formDiv, incluirImagenes = true);
+    await guardarProducto(producto);
+  });
+}
+async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
+  const formId = formDiv.dataset.formId;
+  const images = formImages.get(formId);
+
+  const producto = {
+    nombre: formDiv.querySelector('.nombreProd').value.trim(),
+    precio: parseFloat(formDiv.querySelector('.precioProd').value),
+    descripcion: formDiv.querySelector('.descripcionProd').value.trim(),
+    grupo: formDiv.querySelector('.grupoProd').value.trim() || 'General',
+    subgrupo: formDiv.querySelector('.subgrupoProd').value.trim() || 'general',
+    talles: formDiv.querySelector('.tallesProd').value.split(',').map(t => t.trim()).filter(Boolean)
+  };
+
+  const stockSimpleDiv = formDiv.querySelector('.stockSimple');
+  if (stockSimpleDiv.style.display !== 'none') {
+    producto.stock = parseInt(formDiv.querySelector('.stockGeneral').value) || 0;
+  } else {
+    const stockPorTalleInput = formDiv.querySelector('.stockPorTalle');
+    const stockPorTalle = {};
+    stockPorTalleInput.value.split(',').forEach(item => {
+      const [talle, stock] = item.split(':').map(s => s.trim());
+      if (talle && stock) stockPorTalle[talle] = parseInt(stock) || 0;
+    });
+    producto.stock_por_talle = stockPorTalle;
+  }
+
+  if (incluirImagenes) {
+    if (images.fotoOptimizada) {
+      const url = await subirImagen(images.fotoOptimizada);
+      producto.imagen_url = url;
+    } else {
+      producto.imagen_url = null;
+    }
+    if (images.fotosAdicionales.length > 0) {
+      producto.fotos_adicionales = [];
+      for (const blob of images.fotosAdicionales) {
+        const url = await subirImagen(blob);
+        producto.fotos_adicionales.push(url);
+      }
+    } else {
+      producto.fotos_adicionales = [];
+    }
+  }
+
+  return producto;
+}
+async function subirImagen(blob) {
+  const formData = new FormData();
+  formData.append('file', blob, 'imagen.webp');
+  formData.append('email', window.cliente.email);
+  const resp = await fetch('https://mpagina.onrender.com/subir-foto', {
+    method: 'POST',
+    body: formData
+  });
+  const data = await resp.json();
+  if (data.ok && data.url) return data.url;
+  throw new Error('Error al subir imagen');
+}
+async function guardarProducto(producto) {
+  console.log('Guardando producto:', producto);
+}
+
+if (window.modoAdmin) {
+  document.getElementById('adminFormsContainer').classList.remove('d-none');
+  crearFormulario();
+}
+
+document.getElementById('nuevoFormBtn').addEventListener('click', () => {
+  crearFormulario();
+});
+
+document.getElementById('guardarTodosBtn').addEventListener('click', async () => {
+  const forms = document.querySelectorAll('#formsList .admin-card');
+  for (const form of forms) {
+    const producto = await obtenerDatosFormulario(form, incluirImagenes = true);
+    await guardarProducto(producto);
+  }
+  alert('✅ Todos los productos guardados');
+});
+
 
 
 
