@@ -16,7 +16,9 @@
   margin: 0; /* El gap ya separa */
   box-sizing: border-box;
 }
-
+#adminFormsContainer .admin-card {
+  display: block !important; /* Fuerza a bloque */
+}
 /* Tablets: 2 columnas */
 @media (min-width: 576px) {
   #formsList {
@@ -28,13 +30,6 @@
 @media (min-width: 992px) {
   #formsList {
     grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* Pantallas muy grandes: 4 columnas (opcional) */
-@media (min-width: 1200px) {
-  #formsList {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 
