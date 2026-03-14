@@ -2,10 +2,8 @@ window.fotoOptimizada = null;
 window.fotosAdicionalesExistentes = null;
 window.productoEditandoId = null;
 
-
-
-
 const formImages = new Map(); 
+
 function editarProductoDesdeCard(id_base) {
   const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
   if (!productoOriginal) {
@@ -16,9 +14,11 @@ function editarProductoDesdeCard(id_base) {
   if (container) container.classList.remove('d-none');
   crearFormulario(productoOriginal, { esEdicion: true }); // ✅ CORREGIDO
 }
+
 function generarFormId() {
   return 'form_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
+
 function crearFormulario(producto = null, opciones = {}) {
   const { esEdicion = false } = opciones;
   const template = document.getElementById('productFormTemplate');
@@ -27,30 +27,27 @@ function crearFormulario(producto = null, opciones = {}) {
   const formId = generarFormId();
   formDiv.dataset.formId = formId;
   if (esEdicion && producto?.id_base) {
-    formDiv.dataset.idBase = producto.id_base; // Guardar ID para edición
+    formDiv.dataset.idBase = producto.id_base; 
   }
-
-  // Inicializar estado de imágenes
   const estadoImagenes = { fotoOptimizada: null, fotosAdicionales: [] };
   if (esEdicion && producto) {
-    // Si es edición, guardamos las URLs existentes en el estado
     if (producto.imagen_url) {
       estadoImagenes.imagenExistente = producto.imagen_url;
     }
     if (producto.fotos_adicionales && producto.fotos_adicionales.length) {
-      estadoImagenes.fotosExistentes = producto.fotos_adicionales.slice(); // copia
+      estadoImagenes.fotosExistentes = producto.fotos_adicionales.slice(); 
     }
   }
   formImages.set(formId, estadoImagenes);
 
   if (producto) {
-    rellenarFormulario(formDiv, producto, esEdicion); // pasamos esEdicion
+    rellenarFormulario(formDiv, producto, esEdicion); 
   }
   configurarEventosFormulario(formDiv);
   document.getElementById('formsList').appendChild(formDiv);
 }
+
 function rellenarFormulario(formDiv, producto, esEdicion = false) {
-  // Rellenar campos de texto (siempre)
   formDiv.querySelector('.nombreProd').value = producto.nombre || '';
   formDiv.querySelector('.precioProd').value = producto.precio || '';
   formDiv.querySelector('.descripcionProd').value = producto.descripcion || '';
@@ -58,7 +55,6 @@ function rellenarFormulario(formDiv, producto, esEdicion = false) {
   formDiv.querySelector('.subgrupoProd').value = producto.subgrupo || '';
   formDiv.querySelector('.tallesProd').value = producto.talles ? producto.talles.join(', ') : '';
 
-  // Stock (igual)
   const tallesArray = producto.talles || [];
   const stockSimple = formDiv.querySelector('.stockSimple');
   const stockPorTalleContainer = formDiv.querySelector('.stockPorTalleContainer');
@@ -80,8 +76,6 @@ function rellenarFormulario(formDiv, producto, esEdicion = false) {
     stockPorTalleContainer.style.display = 'none';
     stockGeneral.value = producto.stock || 0;
   }
-
-  // Si es edición, cargar imágenes existentes
   if (esEdicion) {
     const formId = formDiv.dataset.formId;
     const images = formImages.get(formId);
@@ -89,21 +83,16 @@ function rellenarFormulario(formDiv, producto, esEdicion = false) {
     const btnQuitarFoto = formDiv.querySelector('.btnQuitarFoto');
     const previewAdicionales = formDiv.querySelector('.previewFotosAdicionales');
 
-    // Imagen principal existente
     if (producto.imagen_url) {
       previewFoto.src = producto.imagen_url;
       previewFoto.classList.remove('d-none');
-      btnQuitarFoto.classList.remove('d-none'); // Permitir quitar si se desea
-      // Nota: no guardamos en fotoOptimizada, sino que usaremos imagenExistente al guardar
+      btnQuitarFoto.classList.remove('d-none');
     }
-
-    // Fotos adicionales existentes
     if (producto.fotos_adicionales && producto.fotos_adicionales.length) {
       producto.fotos_adicionales.forEach((url, index) => {
         const miniaturaDiv = document.createElement('div');
         miniaturaDiv.style.position = 'relative';
         miniaturaDiv.style.display = 'inline-block';
-        // Podríamos asignar un id único basado en la URL, pero es más sencillo usar índice
         const id = 'existente_' + index + '_' + Date.now();
         miniaturaDiv.dataset.id = id;
 
@@ -137,7 +126,6 @@ function rellenarFormulario(formDiv, producto, esEdicion = false) {
         btnEliminar.onclick = (e) => {
           e.stopPropagation();
           const id = miniaturaDiv.dataset.id;
-          // Eliminar del estado y del DOM
           if (images.fotosExistentes) {
             const index = images.fotosExistentes.indexOf(url);
             if (index !== -1) images.fotosExistentes.splice(index, 1);
@@ -152,11 +140,11 @@ function rellenarFormulario(formDiv, producto, esEdicion = false) {
     }
   }
 }
+
 function configurarEventosFormulario(formDiv) {
   const formId = formDiv.dataset.formId;
   const images = formImages.get(formId);
 
-  // Inicializar array de fotos adicionales si no existe
   if (!images.fotosAdicionales) {
     images.fotosAdicionales = [];
   }
@@ -199,13 +187,11 @@ function configurarEventosFormulario(formDiv) {
     for (const file of files) {
       try {
         const blob = await optimizarImagen(file);
-        const id = Date.now() + '-' + Math.random().toString(36).substr(2, 9); // ID único
+        const id = Date.now() + '-' + Math.random().toString(36).substr(2, 9); 
         const url = URL.createObjectURL(blob);
-        
-        // Guardar en el estado
+
         images.fotosAdicionales.push({ id, blob, url });
-        
-        // Crear contenedor de la miniatura
+ 
         const miniaturaDiv = document.createElement('div');
         miniaturaDiv.style.position = 'relative';
         miniaturaDiv.style.display = 'inline-block';
@@ -237,19 +223,15 @@ function configurarEventosFormulario(formDiv) {
         btnEliminar.style.alignItems = 'center';
         btnEliminar.style.justifyContent = 'center';
         btnEliminar.style.lineHeight = '1';
-        
-        // Evento para eliminar esta foto
+
         btnEliminar.onclick = (e) => {
           e.stopPropagation();
           const id = miniaturaDiv.dataset.id;
           const index = images.fotosAdicionales.findIndex(f => f.id === id);
           if (index !== -1) {
-            // Liberar la URL del objeto
             URL.revokeObjectURL(images.fotosAdicionales[index].url);
-            // Eliminar del array
             images.fotosAdicionales.splice(index, 1);
           }
-          // Eliminar del DOM
           miniaturaDiv.remove();
         };
         
@@ -261,7 +243,6 @@ function configurarEventosFormulario(formDiv) {
         console.warn('Error al optimizar foto adicional', err);
       }
     }
-    // Limpiar el input para permitir seleccionar el mismo archivo de nuevo (opcional)
     fotosAdicionalesInput.value = '';
   });
 
@@ -307,18 +288,16 @@ function configurarEventosFormulario(formDiv) {
   const producto = await obtenerDatosFormulario(formDiv, true);
   const exito = await guardarProducto(producto, formDiv);
   if (exito) {
-    // Liberar URLs de objetos
     if (images.fotoOptimizada) {
       URL.revokeObjectURL(previewFoto.src);
     }
     images.fotosAdicionales.forEach(item => URL.revokeObjectURL(item.url));
     formImages.delete(formId);
     formDiv.remove();
-    // Opcional: crear un nuevo formulario vacío automáticamente
-    // crearFormulario();
     }
   });
 }  
+
 async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
   const formId = formDiv.dataset.formId;
   const images = formImages.get(formId);
@@ -330,7 +309,6 @@ async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
     subgrupo: formDiv.querySelector('.subgrupoProd').value.trim() || 'general',
     talles: formDiv.querySelector('.tallesProd').value.split(',').map(t => t.trim()).filter(Boolean)
   };
-  // Stock (igual)
   const stockSimpleDiv = formDiv.querySelector('.stockSimple');
   if (stockSimpleDiv.style.display !== 'none') {
     producto.stock = parseInt(formDiv.querySelector('.stockGeneral').value) || 0;
@@ -345,22 +323,17 @@ async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
   }
 
   if (incluirImagenes) {
-    // Imagen principal: si hay nueva, se sube; si no, se usa la existente
     if (images.fotoOptimizada) {
       producto.imagen_url = await subirImagen(images.fotoOptimizada);
     } else if (images.imagenExistente) {
-      producto.imagen_url = images.imagenExistente; // ya está en el bucket
+      producto.imagen_url = images.imagenExistente; 
     } else {
       producto.imagen_url = null;
     }
-
-    // Fotos adicionales: combinar las existentes con las nuevas
     producto.fotos_adicionales = [];
-    // Añadir existentes
     if (images.fotosExistentes && images.fotosExistentes.length) {
       producto.fotos_adicionales.push(...images.fotosExistentes);
     }
-    // Subir y añadir nuevas
     if (images.fotosAdicionales.length > 0) {
       for (const item of images.fotosAdicionales) {
         const url = await subirImagen(item.blob);
@@ -370,6 +343,7 @@ async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
   }
   return producto;
 }
+
 async function subirImagen(blob) {
   const formData = new FormData();
   formData.append('file', blob, 'imagen.webp');
@@ -382,6 +356,7 @@ async function subirImagen(blob) {
   if (data.ok && data.url) return data.url;
   throw new Error('Error al subir imagen');
 }
+
 async function guardarProducto(producto, formDiv) {
   const email = window.cliente?.email;
   if (!email) {
@@ -432,14 +407,13 @@ if (window.modoAdmin) {
   const container = document.getElementById('adminFormsContainer');
   if (container) container.classList.remove('d-none');
 
-  // Mostrar botón de salir de admin
   const logoutWrapper = document.getElementById('logoutAdminWrapper');
   if (logoutWrapper) logoutWrapper.style.display = 'block';
 
-  // Mostrar botón de configurar Mercado Pago (si existe)
   const configMP = document.getElementById('configurarMP');
   if (configMP) configMP.classList.remove('d-none');
 }
+
 document.getElementById('nuevoFormBtn').addEventListener('click', () => {
   crearFormulario();
 });
@@ -464,7 +438,6 @@ document.getElementById('guardarTodosBtn').addEventListener('click', async () =>
   }
 
   if (errorCount === 0) {
-    // Eliminar todos los formularios y limpiar estado
     forms.forEach(form => {
       const formId = form.dataset.formId;
       const images = formImages.get(formId);
@@ -479,13 +452,11 @@ document.getElementById('guardarTodosBtn').addEventListener('click', async () =>
       form.remove();
     });
     alert(`✅ ${okCount} productos guardados correctamente.`);
-    // Opcional: crear un nuevo formulario vacío
-    // crearFormulario();
   } else {
     alert(`✅ ${okCount} productos guardados, ❌ ${errorCount} errores. Revisa los que fallaron.`);
-    // No eliminamos ninguno para que el usuario pueda corregir
   }
 });
+
 function duplicarProductoDesdeCard(id_base) {
   const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
   if (!productoOriginal) {
@@ -504,16 +475,8 @@ function duplicarProductoDesdeCard(id_base) {
     stock_por_talle: productoOriginal.stock_por_talle,
     stock: productoOriginal.stock
   };
-  crearFormulario(copia); // ✅ SIN segundo argumento (equivale a { esEdicion: false })
+  crearFormulario(copia); 
 }
-
-
-
-
-
-
-
-
 
 function abrirConfigMercadoPago() {
     console.log("⚙️ Redirigiendo a configuración de Mercado Pago...");
