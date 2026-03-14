@@ -59,6 +59,11 @@ function configurarEventosFormulario(formDiv) {
   const formId = formDiv.dataset.formId;
   const images = formImages.get(formId);
 
+  // Inicializar array de fotos adicionales si no existe
+  if (!images.fotosAdicionales) {
+    images.fotosAdicionales = [];
+  }
+
   const inputFoto = formDiv.querySelector('.inputFoto');
   const previewFoto = formDiv.querySelector('.previewFoto');
   const btnQuitarFoto = formDiv.querySelector('.btnQuitarFoto');
@@ -79,6 +84,9 @@ function configurarEventosFormulario(formDiv) {
   });
 
   btnQuitarFoto.addEventListener('click', () => {
+    if (images.fotoOptimizada) {
+      URL.revokeObjectURL(previewFoto.src);
+    }
     inputFoto.value = '';
     previewFoto.src = '';
     previewFoto.classList.add('d-none');
@@ -94,23 +102,70 @@ function configurarEventosFormulario(formDiv) {
     for (const file of files) {
       try {
         const blob = await optimizarImagen(file);
-        images.fotosAdicionales.push(blob);
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const img = document.createElement('img');
-          img.src = ev.target.result;
-          img.style.width = '60px';
-          img.style.height = '60px';
-          img.style.objectFit = 'cover';
-          img.style.margin = '3px';
-          img.style.borderRadius = '4px';
-          previewAdicionales.appendChild(img);
+        const id = Date.now() + '-' + Math.random().toString(36).substr(2, 9); // ID único
+        const url = URL.createObjectURL(blob);
+        
+        // Guardar en el estado
+        images.fotosAdicionales.push({ id, blob, url });
+        
+        // Crear contenedor de la miniatura
+        const miniaturaDiv = document.createElement('div');
+        miniaturaDiv.style.position = 'relative';
+        miniaturaDiv.style.display = 'inline-block';
+        miniaturaDiv.dataset.id = id;
+        
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.width = '60px';
+        img.style.height = '60px';
+        img.style.objectFit = 'cover';
+        img.style.margin = '3px';
+        img.style.borderRadius = '4px';
+        
+        const btnEliminar = document.createElement('button');
+        btnEliminar.textContent = '✖';
+        btnEliminar.style.position = 'absolute';
+        btnEliminar.style.top = '-5px';
+        btnEliminar.style.right = '-5px';
+        btnEliminar.style.background = 'red';
+        btnEliminar.style.color = 'white';
+        btnEliminar.style.border = 'none';
+        btnEliminar.style.borderRadius = '50%';
+        btnEliminar.style.width = '20px';
+        btnEliminar.style.height = '20px';
+        btnEliminar.style.cursor = 'pointer';
+        btnEliminar.style.fontSize = '12px';
+        btnEliminar.style.fontWeight = 'bold';
+        btnEliminar.style.display = 'flex';
+        btnEliminar.style.alignItems = 'center';
+        btnEliminar.style.justifyContent = 'center';
+        btnEliminar.style.lineHeight = '1';
+        
+        // Evento para eliminar esta foto
+        btnEliminar.onclick = (e) => {
+          e.stopPropagation();
+          const id = miniaturaDiv.dataset.id;
+          const index = images.fotosAdicionales.findIndex(f => f.id === id);
+          if (index !== -1) {
+            // Liberar la URL del objeto
+            URL.revokeObjectURL(images.fotosAdicionales[index].url);
+            // Eliminar del array
+            images.fotosAdicionales.splice(index, 1);
+          }
+          // Eliminar del DOM
+          miniaturaDiv.remove();
         };
-        reader.readAsDataURL(blob);
+        
+        miniaturaDiv.appendChild(img);
+        miniaturaDiv.appendChild(btnEliminar);
+        previewAdicionales.appendChild(miniaturaDiv);
+        
       } catch (err) {
         console.warn('Error al optimizar foto adicional', err);
       }
     }
+    // Limpiar el input para permitir seleccionar el mismo archivo de nuevo (opcional)
+    fotosAdicionalesInput.value = '';
   });
 
   const tallesInput = formDiv.querySelector('.tallesProd');
@@ -133,22 +188,26 @@ function configurarEventosFormulario(formDiv) {
   });
 
   formDiv.querySelector('.duplicar-btn').addEventListener('click', () => {
-    const productoActual = obtenerDatosFormulario(formDiv, incluirImagenes = false);
-    crearFormulario(productoActual); 
+    const productoActual = obtenerDatosFormulario(formDiv, false);
+    crearFormulario(productoActual);
   });
 
   formDiv.querySelector('.eliminar-btn').addEventListener('click', () => {
     if (confirm('¿Eliminar este formulario?')) {
       const images = formImages.get(formId);
-      if (images.fotoOptimizada) URL.revokeObjectURL(previewFoto.src);
-      images.fotosAdicionales.forEach(blob => URL.revokeObjectURL(blob.url));
+      if (images.fotoOptimizada) {
+        URL.revokeObjectURL(previewFoto.src);
+      }
+      images.fotosAdicionales.forEach(item => {
+        URL.revokeObjectURL(item.url);
+      });
       formImages.delete(formId);
       formDiv.remove();
     }
   });
 
   formDiv.querySelector('.guardar-this').addEventListener('click', async () => {
-    const producto = await obtenerDatosFormulario(formDiv, incluirImagenes = true);
+    const producto = await obtenerDatosFormulario(formDiv, true);
     await guardarProducto(producto);
   });
 }
@@ -187,15 +246,14 @@ async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
     }
     if (images.fotosAdicionales.length > 0) {
       producto.fotos_adicionales = [];
-      for (const blob of images.fotosAdicionales) {
-        const url = await subirImagen(blob);
+      for (const item of images.fotosAdicionales) {
+        const url = await subirImagen(item.blob);
         producto.fotos_adicionales.push(url);
       }
     } else {
       producto.fotos_adicionales = [];
     }
   }
-
   return producto;
 }
 async function subirImagen(blob) {
