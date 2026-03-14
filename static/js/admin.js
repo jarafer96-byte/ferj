@@ -428,9 +428,11 @@ async function guardarProducto(producto, formDiv) {
 }
 
 if (window.modoAdmin) {
-  document.getElementById('adminFormsContainer').classList.remove('d-none');
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('adminFormsContainer');
+    if (container) container.classList.remove('d-none');
+  });
 }
-
 document.getElementById('nuevoFormBtn').addEventListener('click', () => {
   crearFormulario();
 });
