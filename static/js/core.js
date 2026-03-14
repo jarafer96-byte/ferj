@@ -4,6 +4,7 @@ const email = window.cliente?.email;
 const URL_BACKEND = "https://mpagina.onrender.com";
 const usarFirestore = false;
 
+let cargaCompleta = false;
 let paginaActual = 1;
 let productosFiltradosActuales = [];
 let isMobile = window.matchMedia("(max-width: 767px)").matches;
@@ -12,9 +13,18 @@ let isScrolling = false;
 window.stockPorTalleData = {};
 let urlProductos = `https://mpagina.onrender.com/api/productos?usuario=${encodeURIComponent(email)}`;
 
-
 if (window.modoAdmin && window.tokenAdmin) {
   urlProductos += `&token=${encodeURIComponent(window.tokenAdmin)}`;
+}
+
+function getVersionUrl(originalUrl, size) {
+    if (originalUrl.includes('_500.webp')) {
+        return originalUrl.replace('_500.webp', `_${size}.webp`);
+    }
+    const lastDot = originalUrl.lastIndexOf('.');
+    if (lastDot === -1) return originalUrl; 
+    const base = originalUrl.substring(0, lastDot);
+    return base + `_${size}.webp`;
 }
 
 renderPagina(1, null);
@@ -259,16 +269,17 @@ function renderProducto(p, esLCP = false) {
 
   const nombreEscapado = p.nombre.replace(/'/g, "\\'").replace(/"/g, '\\"');
   const descripcionEscapada = (p.descripcion || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
-  const imagenUrl = p.imagen_url || '/static/img/fallback.webp';
-  const imagenUrlEscapada = imagenUrl.replace(/'/g, "\\'");
+  const imagenGrande = p.imagen_url || '/static/img/fallback.webp';
+  const imagenGrandeEscapada = imagenGrande.replace(/'/g, "\\'");
   const grupoEscapado = (p.grupo || "").replace(/'/g, "\\'");
   const subgrupoEscapado = (p.subgrupo || "").replace(/'/g, "\\'");
-
+  const imagenCard = getVersionUrl(imagenGrande, '180');
+  
   const fotosAdicionalesSeguras = (p.fotos_adicionales || []).map(foto => 
     foto.replace(/'/g, "\\'").replace(/"/g, '\\"')
   );
   
-  const onclickAgregar = `agregarAlCarritoDOM('${nombreEscapado}', 'precio_${p.id_base}', 'cantidad_${p.id_base}', '${p.id_base}', '${grupoEscapado}', '${subgrupoEscapado}', '${imagenUrlEscapada}')`;
+  const onclickAgregar = `agregarAlCarritoDOM('${nombreEscapado}', 'precio_${p.id_base}', 'cantidad_${p.id_base}', '${p.id_base}', '${grupoEscapado}', '${subgrupoEscapado}', '${imagenGrandeEscapada}')`;
   
   let whatsappUrl = configWhatsApp;
   
@@ -286,21 +297,22 @@ function renderProducto(p, esLCP = false) {
   const fotosAdicionalesHTML = fotosAdicionalesSeguras.length > 0 ? `
     <div class="fotos-adicionales mt-2">
       <div class="d-flex flex-wrap mt-1" style="gap: 3px;">
-        ${fotosAdicionalesSeguras.slice(0, 3).map((foto, idx) => `
-          <img src="${foto}" 
-               alt="Foto ${idx+1}" 
-               style="width: 40px; height: 40px; object-fit: cover; border-radius: 3px; cursor: pointer;"
-               onclick="openModal('${foto}')">
-        `).join('')}
-        ${fotosAdicionalesSeguras.length > 3 ? `<span class="ms-1 text-muted">+${fotosAdicionalesSeguras.length - 3}</span>` : ''}
+        ${fotosAdicionalesSeguras.map((foto, idx) => {
+            const miniatura = getVersionUrl(foto, '58');
+            return `
+                <img src="${miniatura}" 
+                     alt="Foto ${idx+1}" 
+                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 3px; cursor: pointer;"
+                     onclick="openModal('${foto}')">
+            `;
+        }).join('')}
       </div>
     </div>
   ` : '';
   
-  const imgSrc = `${imagenUrl}${imagenUrl.includes('?') ? '&' : '?'}format=webp`;
-  let imgAttributes = `src="${imgSrc}"`;
+  let imgAttributes = `src="${imagenCard}"`;
   if (!esLCP) {
-      imgAttributes += ` data-src="${imagenUrl}" loading="lazy"`;
+      imgAttributes += ` data-src="${imagenCard}" loading="lazy"`;
   } else {
       imgAttributes += ` loading="eager" fetchpriority="high"`;
   }
@@ -345,7 +357,7 @@ function renderProducto(p, esLCP = false) {
              style="width:100%; height:180px; object-fit:contain; border-radius:4px; cursor:pointer; opacity:0;"
              class="lazy-image"
              onload="this.style.opacity='1'"
-             onclick="openModal('${imagenUrl}')">
+             onclick="openModal('${imagenGrandeEscapada}')">
         <div class="card-body">
           <h5 class="card-title" style="font-size: 1.1rem !important;">${p.nombre}</h5>
           
@@ -365,7 +377,8 @@ function renderProducto(p, esLCP = false) {
     <label class="mb-0"><strong>Talle:</strong></label>
     <select id="talle_${p.id_base}" class="form-select form-select-sm w-auto"
             onchange="actualizarStockPorTalle('${p.id_base}', this.value)"
-            style="min-width: 80px; max-width: 160px;">
+            style="min-width: 160px; max-width: 180px;"
+            aria-label="Seleccionar talle para ${p.nombre}">
       <option value="">-</option>
       ${opcionesTalles}
     </select>
@@ -376,7 +389,8 @@ function renderProducto(p, esLCP = false) {
             <input type="number" min="1" max="${stockInicial > 0 ? stockInicial : 1}" value="1"
                    id="cantidad_${p.id_base}"
                    class="form-control form-control-sm" style="width: 70px;"
-                   ${stockInicial <= 0 ? "disabled" : ""}>
+                   ${stockInicial <= 0 ? "disabled" : ""}
+                   aria-label="Cantidad de ${p.nombre}">
             
             <button type="button" class="btn btn-secondary btn-sm" id="btn_agregar_${p.id_base}"
               onclick="${onclickAgregar}"
@@ -762,7 +776,7 @@ function actualizarCarrito(conAnimacion = false) {
 
   const contadorSpan = document.getElementById('carrito-contador');
   if (contadorSpan) {
-    const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+    const totalItems = window.carrito.reduce((acc, item) => acc + item.cantidad, 0);
     contadorSpan.textContent = totalItems;
     contadorSpan.style.background = totalItems > 0 ? '#ff4757' : '#888';
 
@@ -1403,23 +1417,39 @@ document.addEventListener('DOMContentLoaded', () => {
 function cargarMercadoPagoJS() {
   return new Promise((resolve, reject) => {
     if (window.mercadoPagoCargado) return resolve();
-    const script = document.createElement('script');
-    script.src = 'static/js/mercadopago.js';
-    script.onload = async () => {
-      window.mercadoPagoCargado = true;
-      if (typeof window.initMercadoPago === 'function') {
-        window.initMercadoPago().catch(console.warn);
-      }
-      resolve();
+
+    const cargar = () => {
+      const script = document.createElement('script');
+      script.src = 'static/js/mercadopago.js';
+      script.async = true; // No bloquea el renderizado
+      script.onload = async () => {
+        window.mercadoPagoCargado = true;
+        resolve();
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
     };
-    script.onerror = reject;
-    document.head.appendChild(script);
+
+    // Diferir la carga a un momento de inactividad
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(cargar, { timeout: 2000 });
+    } else {
+      setTimeout(cargar, 1000); // fallback para navegadores antiguos
+    }
   });
 }
 
+let pagando = false;
+
 document.getElementById('btnPagarFinal')?.addEventListener('click', async () => {
-  await cargarMercadoPagoJS();
-  window.pagarTodoJunto(); 
+  if (pagando) return;
+  pagando = true;
+  try {
+    await cargarMercadoPagoJS();
+    await window.pagarTodoJunto();
+  } finally {
+    pagando = false;
+  }
 });
 
   document.addEventListener("click", (e) => {
@@ -1549,13 +1579,3 @@ document.getElementById('loginToggleBtn').onclick = () => {
     }, 400);
   });
 });
-
-
-
-
-
-
-
-
-
-
