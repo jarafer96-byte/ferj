@@ -305,7 +305,7 @@ function configurarEventosFormulario(formDiv) {
 
   formDiv.querySelector('.guardar-this').addEventListener('click', async () => {
     const producto = await obtenerDatosFormulario(formDiv, true);
-    await guardarProducto(producto);
+    await guardarProducto(producto, formDiv);
   });
 }
 async function obtenerDatosFormulario(formDiv, incluirImagenes = false) {
