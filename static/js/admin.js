@@ -269,7 +269,47 @@ async function subirImagen(blob) {
   throw new Error('Error al subir imagen');
 }
 async function guardarProducto(producto) {
-  console.log('Guardando producto:', producto);
+  const email = window.cliente?.email;
+  if (!email) {
+    alert("❌ No hay email de admin, no se puede guardar");
+    throw new Error("Email no disponible");
+  }
+
+  // Preparar payload (similar a btnConfirmarProd)
+  const payload = {
+    producto: producto,
+    email: email,
+    es_edicion: false // Por ahora siempre creación (puedes ajustar si tienes edición)
+  };
+
+  try {
+    const resp = await fetch("https://mpagina.onrender.com/guardar-producto", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      throw new Error(`Error HTTP ${resp.status}: ${text.substring(0, 200)}`);
+    }
+
+    const data = await resp.json();
+    if (data.status === "ok") {
+      console.log("✅ Producto guardado:", data);
+      // Opcional: mostrar notificación breve
+      // Puedes usar mostrarToast si está disponible
+      if (typeof mostrarToast === 'function') {
+        mostrarToast(`✅ ${producto.nombre} guardado`);
+      }
+    } else {
+      throw new Error(data.error || data.message || "Error al guardar producto");
+    }
+  } catch (err) {
+    console.error("❌ Error guardando producto:", err);
+    alert("❌ Error: " + err.message);
+    throw err; // Para que quien llama sepa que falló
+  }
 }
 
 if (window.modoAdmin) {
@@ -283,11 +323,18 @@ document.getElementById('nuevoFormBtn').addEventListener('click', () => {
 
 document.getElementById('guardarTodosBtn').addEventListener('click', async () => {
   const forms = document.querySelectorAll('#formsList .admin-card');
+  let okCount = 0;
+  let errorCount = 0;
   for (const form of forms) {
-    const producto = await obtenerDatosFormulario(form, incluirImagenes = true);
-    await guardarProducto(producto);
+    try {
+      const producto = await obtenerDatosFormulario(form, true); // incluir imágenes
+      await guardarProducto(producto);
+      okCount++;
+    } catch (err) {
+      errorCount++;
+    }
   }
-  alert('✅ Todos los productos guardados');
+  alert(`✅ ${okCount} productos guardados, ❌ ${errorCount} errores.`);
 });
 function duplicarProductoDesdeCard(id_base) {
   const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
