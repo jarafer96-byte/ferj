@@ -6,7 +6,16 @@ window.productoEditandoId = null;
 
 
 const formImages = new Map(); 
-
+function editarProductoDesdeCard(id_base) {
+  const productoOriginal = window.todosLosProductos?.find(p => p.id_base === id_base);
+  if (!productoOriginal) {
+    alert("❌ Producto no encontrado");
+    return;
+  }
+  const container = document.getElementById('adminFormsContainer');
+  if (container) container.classList.remove('d-none');
+  crearFormulario(productoOriginal, true); // true = esEdicion
+}
 function generarFormId() {
   return 'form_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
