@@ -10,12 +10,13 @@ const formImages = new Map();
 function generarFormId() {
   return 'form_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
-function crearFormulario(producto = null) {
+function crearFormulario(producto = null, idBase = null) {
   const template = document.getElementById('productFormTemplate');
   const clone = template.content.cloneNode(true);
   const formDiv = clone.querySelector('.admin-card');
   const formId = generarFormId();
   formDiv.dataset.formId = formId;
+  if (idBase) formDiv.dataset.idBase = idBase; // Guardar ID para edición
 
   formImages.set(formId, { fotoOptimizada: null, fotosAdicionales: [] });
 
