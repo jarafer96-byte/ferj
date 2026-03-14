@@ -314,7 +314,6 @@ async function guardarProducto(producto) {
 
 if (window.modoAdmin) {
   document.getElementById('adminFormsContainer').classList.remove('d-none');
-  crearFormulario();
 }
 
 document.getElementById('nuevoFormBtn').addEventListener('click', () => {
